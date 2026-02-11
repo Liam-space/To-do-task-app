@@ -115,3 +115,23 @@ li span {
   border-color: rgba(255, 107, 107, 0.6);
   color: var(--danger);
 }
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: var(--muted);
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  border-color: var(--accent);
+  color: var(--text);
+}
