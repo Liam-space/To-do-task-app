@@ -15,8 +15,23 @@ function getFilteredTasks() {
   return tasks;
 }
 
+function updateStats() {
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.completed).length;
+  const active = total - completed;
+
+  const totalEl = document.getElementById("totalCount");
+  const activeEl = document.getElementById("activeCount");
+  const completedEl = document.getElementById("completedCount");
+
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (completedEl) completedEl.textContent = completed;
+}
+
 function renderTasks() {
   list.innerHTML = "";
+  updateStats();
 
   const filteredTasks = getFilteredTasks();
 
@@ -37,12 +52,50 @@ function renderTasks() {
       renderTasks();
     });
 
+    // Actions container (edit + delete)
+    const actions = document.createElement("div");
+    actions.classList.add("actions");
+
+    // Edit button (pencil)
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.classList.add("icon-btn");
+    editBtn.textContent = "✎";
+
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const inputEl = document.createElement("input");
+      inputEl.type = "text";
+      inputEl.value = task.text;
+      inputEl.classList.add("edit-input");
+
+      // swap span -> input
+      li.replaceChild(inputEl, span);
+      inputEl.focus();
+      inputEl.select();
+
+      function saveEdit() {
+        const newText = inputEl.value.trim();
+        if (newText) task.text = newText;
+        saveTasks();
+        renderTasks();
+      }
+
+      inputEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") saveEdit();
+        if (ev.key === "Escape") renderTasks(); // cancel
+      });
+
+      inputEl.addEventListener("blur", saveEdit);
+    });
+
+    // Delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
+    deleteBtn.classList.add("icon-btn", "danger");
     deleteBtn.textContent = "✕";
-    deleteBtn.classList.add("delete-btn");
 
-    // Delete by ID (safe even when filtered)
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       tasks = tasks.filter((t) => t.id !== task.id);
@@ -50,8 +103,11 @@ function renderTasks() {
       renderTasks();
     });
 
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
     li.appendChild(span);
-    li.appendChild(deleteBtn);
+    li.appendChild(actions);
     list.appendChild(li);
   });
 }
@@ -63,7 +119,7 @@ form.addEventListener("submit", (e) => {
   if (!text) return;
 
   tasks.push({
-    id: crypto.randomUUID(), // unique ID per task
+    id: crypto.randomUUID(),
     text,
     completed: false,
   });
